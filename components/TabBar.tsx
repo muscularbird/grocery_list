@@ -24,7 +24,7 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
     if (!dimensions.width) return;
     const centerOffset = (buttonWidth - indicatorWidth) / 2;
     const targetX = buttonWidth * state.index + centerOffset;
-    tabPositionX.value = withSpring(targetX, { stiffness: 10 });
+    tabPositionX.value = withSpring(targetX, { damping: 16, stiffness: 140 });
   }, [dimensions.width, state.index]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -75,7 +75,7 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
             canPreventDefault: true,
           });
           if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
+            navigation.navigate(route.name);
           }
         };
 
