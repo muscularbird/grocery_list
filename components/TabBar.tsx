@@ -14,14 +14,8 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
     });
   };
 
-  // filter routes once
-const filteredRoutes = state.routes.filter(
-  (route) => !route.name.startsWith("myworkflow") && !route.name.startsWith("services")
-);
-
-
   // width per visible tab
-  const buttonWidth = dimensions.width / filteredRoutes.length;
+  const buttonWidth = dimensions.width / state.routes.length;
 
   const tabPositionX = useSharedValue(0);
 
@@ -43,7 +37,7 @@ const filteredRoutes = state.routes.filter(
         className="absolute bottom-2 bg-blue-900 rounded-full"
       />
 
-      {filteredRoutes.map((route, index) => {
+      {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
       const label =
         typeof options.tabBarLabel === "string"

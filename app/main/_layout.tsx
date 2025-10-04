@@ -16,12 +16,12 @@ export default function TabsLayout() {
           ),
         }}
       />
-            <Tabs.Screen
+      <Tabs.Screen
         name="settings"
         options={{
           title: "settings",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="settings" size={24} color={color} />
+            <MaterialIcons name="settings" size={24} color={color} />
           ),
         }}
       />

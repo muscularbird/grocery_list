@@ -2,8 +2,21 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Feather from '@expo/vector-icons/Feather';
 import { Text, View, TouchableOpacity, Pressable } from "react-native";
 import { Item } from '@/app/main/home';
+import { supabase } from '@/utils/supabase';
 
-const renderItem = ({ item, drag, isActive }: {item: Item, drag: any, isActive: boolean}) => {
+const renderItem = ({ item, drag, isActive, setItems }: {item: Item, drag: any, isActive: boolean, setItems: Function}) => {
+    const deleteItem = (id: number) => {
+        console.log('Delete item', id);
+        supabase.from('items').delete().eq('id', id).then(({ error }) => {
+            if (error) {
+            console.error('Error deleting item:', error.message);
+            } else {
+            console.log('Item deleted successfully');
+            setItems((items: Item[]) => items.filter((item) => item.id !== id));
+            }
+        });
+    }
+
     const renderLeftActions = () => (
       <View>
         <Text>Edit</Text>
@@ -12,7 +25,7 @@ const renderItem = ({ item, drag, isActive }: {item: Item, drag: any, isActive: 
 
     const renderRightActions = () => (
       <View className='justify-center items-center m-4'>
-        <Pressable onPress={() => console.log('Delete item', item.id)}>
+        <Pressable onPress={() => deleteItem(item.id)}>
           <Feather name="trash-2" size={30} color="red" />
         </Pressable>
       </View>

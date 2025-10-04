@@ -1,8 +1,6 @@
 import React, { JSX, useEffect } from "react";
 import { View, Pressable } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Octicons from "@expo/vector-icons/Octicons";
 import Animated, {
   interpolate,
   useSharedValue,
@@ -27,8 +25,7 @@ export default function TabBarButton({
 }) {
   const icons: Record<string, (props: any) => JSX.Element> = {
     home: (props) => <MaterialIcons name="home" size={28} {...props} />,
-    workflows: (props) => <Octicons name="workflow" size={24} {...props} />,
-    profile: (props) => <AntDesign name="user" size={28} {...props} />,
+    settings: (props) => <MaterialIcons name="settings" size={24} {...props} />
   };
 
   const AnimatedView = Animated.createAnimatedComponent(View);
