@@ -3,8 +3,8 @@ import { supabase } from '@/utils/supabase';
 import { useEffect, useState } from "react";
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import RenderItem from '@/components/renderItem';
-import WheelPicker from '@quidone/react-native-wheel-picker';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import EditAddModal from "@/components/editAddModal";
 
 export interface Item {
   id: number;
@@ -13,21 +13,17 @@ export interface Item {
   purchased: boolean;
 }
 
-const data = [...Array(100).keys()].map((index) => ({
-  value: index,
-  label: index.toString(),
-}))
-
 export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
-  const [quantity, setQuantity] = useState<number>(1);
   const [modalVisible, setModalVisible] = useState(false);
-  const [itemName, setItemName] = useState('');
+  const [itemId, setItemId] = useState(-1);
+  const [data, setData] = useState(items);
 
   useEffect(() => {
     const getItems = async () => {
       try {
         const { data: items, error } = await supabase.from('items').select();
+        items?.sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)); // sort by rank
 
         if (error) {
           console.error('Error fetching todos:', error.message);
@@ -46,29 +42,27 @@ export default function Home() {
     getItems();
   }, []);
 
-  const addItem = async () => {
-    if (itemName.trim() === '') {
-      return;
-    }
-    
+    const handleDragEnd = async ({ data }: { data: Item[] }) => {
+    setData(data);
+    setItems(data);
+
+    // Update rank in DB
+    const updates = data.map((item, index) => ({
+      id: item.id,
+      rank: index + 1, // rank starting from 1
+      name: item.name,
+    }));
+
     try {
-      const { data, error } = await supabase
-        .from('items')
-        .insert([{ name: itemName, quantity, purchased: false }])
-        .select();
-        
+      const { error } = await supabase
+        .from("items")
+        .upsert(updates, { onConflict: "id" }); // update based on id
+
       if (error) {
-        console.error('Error adding item:', error.message);
-        return;
+        console.error("Error updating ranks:", error.message);
       }
-      if (data && data.length > 0) {
-        setItems((prevItems) => [...prevItems, data[0]]);
-        setItemName('');
-        setQuantity(1);
-        setModalVisible(false);
-      }
-    } catch (error: any) {
-      console.error('Error adding item:', error.message);
+    } catch (err) {
+      console.error("Unexpected error:", err);
     }
   };
 
@@ -77,36 +71,12 @@ export default function Home() {
         <DraggableFlatList
           data={items}
           renderItem={(params) => (
-            <RenderItem {...params} setItems={setItems} />
+            <RenderItem {...params} setItems={setItems} itemId={itemId} setItemId={setItemId}/>
           )}
           keyExtractor={(item) => (item.id).toString()}
-          onDragEnd={({ data }) => setItems(data)}
+          onDragEnd={handleDragEnd}
         />
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-            addItem();
-          }}
-        >
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="w-4/5 h-40 bg-white rounded-3xl items-center p-4 flex-row justify-between">
-              <TextInput className="w-38 h-16 border-gray-300 text-2xl mr-20"
-                  placeholder="Item name" onChangeText={setItemName} value={itemName} scrollEnabled/>
-                <WheelPicker
-                  data={data}
-                  value={quantity}
-                  onValueChanged={({item: {value}}) => setQuantity(value)}
-                  enableScrollByTapOnItem={true}
-                  style={{marginRight: 20 }}
-                  width={80}
-                  itemHeight={40}
-                />
-            </View>
-          </View>
-        </Modal>
+      <EditAddModal modalVisible={modalVisible} setModalVisible={setModalVisible} itemId={itemId} setItemId={setItemId} items={items} setItems={setItems}/>
       <View className="absolute bottom-32 right-16 bg-blue-900 rounded-full p-4" onTouchStart={() => setModalVisible(true)}>
         <MaterialIcons name="add" size={30} color="white" />
       </View>

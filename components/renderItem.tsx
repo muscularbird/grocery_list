@@ -4,7 +4,7 @@ import { Text, View, TouchableOpacity, Pressable } from "react-native";
 import { Item } from '@/app/main/home';
 import { supabase } from '@/utils/supabase';
 
-const renderItem = ({ item, drag, isActive, setItems }: {item: Item, drag: any, isActive: boolean, setItems: Function}) => {
+const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item: Item, drag: any, isActive: boolean, setItems: Function, itemId: number, setItemId: Function}) => {
     const deleteItem = (id: number) => {
         console.log('Delete item', id);
         supabase.from('items').delete().eq('id', id).then(({ error }) => {
@@ -17,9 +17,16 @@ const renderItem = ({ item, drag, isActive, setItems }: {item: Item, drag: any, 
         });
     }
 
+    const editItem = (id: number) => {
+        console.log('Edit item', id);
+        setItemId(id);
+    }
+
     const renderLeftActions = () => (
-      <View>
-        <Text>Edit</Text>
+      <View className='justify-center items-center m-4'>
+        <Pressable onPress={() => editItem(item.id)}>
+            <Feather name="edit-2" size={30} color="#fcba03" />
+        </Pressable>
       </View>
     );
 

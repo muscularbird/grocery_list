@@ -54,7 +54,7 @@ export default function TabBarButton({
   });
 
   return (
-    <View>
+    <View className="flex-1 items-center">
       <Pressable
         onPress={onPress}
         onLongPress={onLongPress}
