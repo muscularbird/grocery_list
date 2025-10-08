@@ -2,6 +2,7 @@
   "expo": {
     "name": "grocery-list",
     "slug": "grocery-list",
+    "scheme": "grocerylist",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -49,7 +50,8 @@
       "router": {},
       "eas": {
         "projectId": "e22097d6-3467-4bcc-adfc-494b1c8d9551"
-      }
+      },
+      "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZzY2FsdWdqeWZrbWhueXZubGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk1Mjc4MDUsImV4cCI6MjA3NTEwMzgwNX0.J5iJ3ePHWHBtlesw-mTOZrgJiAe3O01GmQO31hZNSoA"
     }
   }
 }
