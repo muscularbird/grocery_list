@@ -70,7 +70,7 @@ export default function Home() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
         <DraggableFlatList
           data={items}
           renderItem={(params) => (
@@ -83,7 +83,7 @@ export default function Home() {
           // ListFooterComponent={<View style={{ height: 120 }} />}
         />
       <EditAddModal modalVisible={modalVisible} setModalVisible={setModalVisible} itemId={itemId} setItemId={setItemId} items={items} setItems={setItems}/>
-      <View className="absolute bottom-28 right-16 bg-blue-900 rounded-full p-4 shadow-black shadow-xl shadow-" onTouchStart={() => setModalVisible(true)}>
+      <View className="absolute bottom-28 right-16 bg-primary rounded-full p-4 shadow-black shadow-xl shadow-" onTouchStart={() => setModalVisible(true)}>
         <MaterialIcons name="add" size={30} color="white" />
       </View>
       <View className="">

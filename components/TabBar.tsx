@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, LayoutChangeEvent } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import TabBarButton from './TabBarButton';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const [dimensions, setDimensions] = useState({ width: 320, height: 56 });
@@ -24,7 +24,7 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
     if (!dimensions.width) return;
     const centerOffset = (buttonWidth - indicatorWidth) / 2;
     const targetX = buttonWidth * state.index + centerOffset;
-    tabPositionX.value = withSpring(targetX, { damping: 16, stiffness: 140 });
+    tabPositionX.value = withTiming(targetX, { duration: 300 });
   }, [dimensions.width, state.index]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -44,7 +44,6 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
         alignSelf: 'center',
         width: '75%',
         flexDirection: 'row',
-        backgroundColor: 'white',
         borderRadius: 999,
         padding: 8,
         justifyContent: 'space-between',
@@ -55,13 +54,15 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
         shadowRadius: 3.84,
         elevation: 5,
       }}
+      className='bg-primaryForeground'
     >
       {/* animated bubble */}
       <Animated.View
         style={[
           animatedStyle,
-          { bottom: 8, backgroundColor: '#0b3b82', borderRadius: 999 },
+          { bottom: 8, borderRadius: 999 },
         ]}
+        className="bg-primary shadow-black"
       />
 
       {state.routes.map((route, index) => {
@@ -72,7 +73,7 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
         const onPress = () => {
           const centerOffset = (buttonWidth - indicatorWidth) / 2;
           const targetX = buttonWidth * index + centerOffset;
-          tabPositionX.value = withSpring(targetX, { damping: 16, stiffness: 140 });
+          tabPositionX.value = withTiming(targetX, { duration: 300 });
 
           const event = navigation.emit({
             type: 'tabPress',

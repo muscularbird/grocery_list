@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { useTheme } from "@/utils/ThemeProvider";
 
 export default function TabBarButton({
   onPress,
@@ -27,6 +28,8 @@ export default function TabBarButton({
     home: (props) => <MaterialIcons name="home" size={28} {...props} />,
     settings: (props) => <MaterialIcons name="settings" size={24} {...props} />
   };
+
+  const { theme } = useTheme();
 
   const AnimatedView = Animated.createAnimatedComponent(View);
 
@@ -61,11 +64,11 @@ export default function TabBarButton({
         className="flex justify-center items-center"
       >
         <AnimatedView style={animatedIconStyle}>
-          {icons[routeName] ? icons[routeName]({ color }) : null}
+          {icons[routeName] ? icons[routeName]({ color: isFocused ? "#FFF" : (theme === "dark" ? "#FFF" : "#222") }) : null}
         </AnimatedView>
         <Animated.Text
           style={[
-            { color: isFocused ? "#FFF" : "#222", fontSize: 12 },
+            { color: isFocused ? "#FFF" : (theme === "dark" ? "#FFF" : "#222"), fontSize: 12 },
             animatedTextStyle,
           ]}
         >

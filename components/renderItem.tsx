@@ -43,10 +43,10 @@ const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item
       <Swipeable renderLeftActions={renderLeftActions} renderRightActions={renderRightActions}>
         <TouchableOpacity
           onLongPress={drag}
-          className="w-full h-24 border-b border-gray-300 justify-center p-4 rounded-full"
-          style={{ backgroundColor: isActive ? 'gray' : 'white' }}
+          className="w-full h-24 justify-center p-4 rounded-2xl border-secondary border bg-primaryForeground"
+          // style={{ backgroundColor: isActive ? 'gray' : 'white' }}
         >
-          <Text className="text-2xl" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>{item.name} x{item.quantity}</Text>
+          <Text className="text-2xl text-text" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>{item.name} x{item.quantity}</Text>
         </TouchableOpacity>
       </Swipeable>
     );
