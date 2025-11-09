@@ -3,6 +3,7 @@ import { Modal, Pressable, TextInput, View, Text } from "react-native";
 import { Item } from '@/app/main/home';
 import { supabase } from '@/utils/supabase';
 import { useState, useEffect, useMemo } from "react";
+import showToast from '@/utils/showToast';
 
 const data = [...Array(100).keys()].map((index) => ({
     value: index,
@@ -12,21 +13,21 @@ const data = [...Array(100).keys()].map((index) => ({
 export default function EditAddModal({ modalVisible, setModalVisible, itemId, setItemId, items, setItems }: { modalVisible: boolean; setModalVisible: Function; itemId: number; setItemId: Function; items: Item[]; setItems: Function }) {
     const [itemName, setItemName] = useState<string>('' + (itemId !== -1 ? items.find(item => item.id === Number(itemId))?.name : ''));
     const [quantity, setQuantity] = useState<number>(itemId !== -1 ? (items.find(item => item.id === Number(itemId))?.quantity || 1) : 1);
-  const selectedItem = useMemo(
-    () => items.find(item => item.id === Number(itemId)) ?? null,
-    [items, itemId]
-  );
+    const selectedItem = useMemo(
+        () => items.find(item => item.id === Number(itemId)) ?? null,
+        [items, itemId]
+    );
 
-  // update state when a new item is selected (or reset if new item)
-  useEffect(() => {
-    if (itemId !== -1 && selectedItem) {
-      setItemName(selectedItem.name);
-      setQuantity(selectedItem.quantity ?? 1);
-    } else {
-      setItemName('');
-      setQuantity(1);
-    }
-  }, [itemId, selectedItem]);
+    useEffect(() => {
+        if (itemId !== -1 && selectedItem) {
+        setItemName(selectedItem.name);
+        setQuantity(selectedItem.quantity ?? 1);
+        } else {
+        setItemName('');
+        setQuantity(1);
+        }
+    }, [itemId, selectedItem]);
+
     const addItem = async () => {
         if (itemName.trim() === '') {
         return;
@@ -47,9 +48,11 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
             setItemName('');
             setQuantity(1);
             setModalVisible(false);
+            showToast('success', 'Success', 'Item added successfully');
         }
         } catch (error: any) {
-        console.error('Error adding item:', error.message);
+            console.error('Error adding item:', error.message);
+            showToast('error', 'Error', error.message);
         }
     };
 
@@ -67,6 +70,7 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
             
         if (error) {
             console.error('Error modifying item:', error.message);
+            showToast('error', 'Error', error.message);
             return;
         }
         if (data && data.length > 0) {
@@ -77,22 +81,24 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
             setQuantity(1);
             setModalVisible(false);
             console.log('update item', itemId);
+            showToast('success', 'Success', 'Item updated successfully');
         }
         } catch (error: any) {
-        console.error('Error modifying item:', error.message);
+            console.error('Error modifying item:', error.message);
+            showToast('error', 'Error', error.message);
         }
     };
 
 
     return (
         <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible || itemId !== -1}
-        onRequestClose={() => {
-            // just close without saving
-            setModalVisible(false);
-            setItemId(-1);
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible || itemId !== -1}
+            onRequestClose={() => {
+                // just close without saving
+                setModalVisible(false);
+                setItemId(-1);
         }}
         >
         <View className="flex-1 justify-center items-center bg-black/50">

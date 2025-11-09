@@ -5,6 +5,7 @@ import DraggableFlatList from 'react-native-draggable-flatlist';
 import RenderItem from '@/components/renderItem';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import EditAddModal from "@/components/editAddModal";
+import showToast from "@/utils/showToast";
 
 export interface Item {
   id: number;
@@ -36,13 +37,14 @@ export default function Home() {
         }
       } catch (error: any) {
         console.error('Error fetching todos:', error.message);
+        showToast('error', 'Error', error.message);
       }
     };
 
     getItems();
   }, []);
 
-    const handleDragEnd = async ({ data }: { data: Item[] }) => {
+  const handleDragEnd = async ({ data }: { data: Item[] }) => {
     setData(data);
     setItems(data);
 
@@ -60,6 +62,7 @@ export default function Home() {
 
       if (error) {
         console.error("Error updating ranks:", error.message);
+        showToast('error', 'Error', error.message);
       }
     } catch (err) {
       console.error("Unexpected error:", err);
@@ -75,10 +78,15 @@ export default function Home() {
           )}
           keyExtractor={(item) => (item.id).toString()}
           onDragEnd={handleDragEnd}
+          /* ensure last item is visible above bottom navbar / floating buttons */
+          contentContainerStyle={{ paddingBottom: 80 }}
+          // ListFooterComponent={<View style={{ height: 120 }} />}
         />
       <EditAddModal modalVisible={modalVisible} setModalVisible={setModalVisible} itemId={itemId} setItemId={setItemId} items={items} setItems={setItems}/>
-      <View className="absolute bottom-32 right-16 bg-blue-900 rounded-full p-4" onTouchStart={() => setModalVisible(true)}>
+      <View className="absolute bottom-28 right-16 bg-blue-900 rounded-full p-4 shadow-black shadow-xl shadow-" onTouchStart={() => setModalVisible(true)}>
         <MaterialIcons name="add" size={30} color="white" />
+      </View>
+      <View className="">
       </View>
     </View>
   );

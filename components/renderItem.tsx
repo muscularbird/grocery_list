@@ -3,6 +3,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { Text, View, TouchableOpacity, Pressable } from "react-native";
 import { Item } from '@/app/main/home';
 import { supabase } from '@/utils/supabase';
+import showToast from '@/utils/showToast';
 
 const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item: Item, drag: any, isActive: boolean, setItems: Function, itemId: number, setItemId: Function}) => {
     const deleteItem = (id: number) => {
@@ -42,10 +43,10 @@ const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item
       <Swipeable renderLeftActions={renderLeftActions} renderRightActions={renderRightActions}>
         <TouchableOpacity
           onLongPress={drag}
-          className="w-full h-24 border-b border-gray-300 justify-center p-4"
+          className="w-full h-24 border-b border-gray-300 justify-center p-4 rounded-full"
           style={{ backgroundColor: isActive ? 'gray' : 'white' }}
         >
-          <Text className="text-2xl">{item.name} x{item.quantity}</Text>
+          <Text className="text-2xl" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>{item.name} x{item.quantity}</Text>
         </TouchableOpacity>
       </Swipeable>
     );

@@ -49,6 +49,11 @@ export function MyTabBar({ state, descriptors, navigation }: BottomTabBarProps) 
         padding: 8,
         justifyContent: 'space-between',
         alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
       }}
     >
       {/* animated bubble */}

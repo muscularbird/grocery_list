@@ -2,6 +2,7 @@ import { Slot, Stack } from "expo-router";
 import '@/global.css';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
 
 function RootLayoutNav() {
   return (<Stack screenOptions={{ headerShown: false }}>
@@ -10,6 +11,10 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+
+  const [loaded] = useFonts({
+    'Nunito': require('../assets/fonts/Nunito-VariableFont_wght.ttf'),
+  })
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
