@@ -19,7 +19,7 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1 }} className="bg-background">
           <Slot />
         </SafeAreaView>
       </GestureHandlerRootView>

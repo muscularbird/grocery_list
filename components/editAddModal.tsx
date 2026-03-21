@@ -89,20 +89,20 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
         }
     };
 
+    const closeModal = () => {
+        setModalVisible(false);
+        setItemId(-1);
+    };
 
     return (
         <Modal
             animationType="fade"
             transparent={true}
             visible={modalVisible || itemId !== -1}
-            onRequestClose={() => {
-                // just close without saving
-                setModalVisible(false);
-                setItemId(-1);
-        }}
+            onRequestClose={closeModal}
         >
-        <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="w-4/5 h-60 bg-white rounded-3xl items-center p-4 flex-col justify-between">
+        <Pressable className="flex-1 justify-center items-center bg-black/50" onPress={closeModal}>
+            <Pressable className="w-4/5 h-60 bg-primary rounded-3xl items-center p-4 flex-col justify-between" onPress={(event) => event.stopPropagation()}>
             <View className="flex-row justify-between w-full items-center m-auto">
             <TextInput
                 className="w-46 h-20 text-3xl px-3 mb-4"
@@ -131,8 +131,8 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
                 >
                 <Text className="text-white text-lg">Save</Text>
             </Pressable>
-            </View>
-        </View>
+            </Pressable>
+        </Pressable>
         </Modal>
     );
 }
