@@ -3,7 +3,6 @@ import { useTheme } from '../utils/ThemeProvider';
 import Feather from '@expo/vector-icons/Feather';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useEffect } from 'react';
-import React from 'react';
 
 const ThemeToggle = () => {
   const { theme, toggleTheme } = useTheme();

@@ -26,6 +26,7 @@ export default function TabBarButton({
 }) {
   const icons: Record<string, (props: any) => JSX.Element> = {
     home: (props) => <MaterialIcons name="home" size={28} {...props} />,
+    menus: (props) => <MaterialIcons name="menu-book" size={24} {...props} />,
     settings: (props) => <MaterialIcons name="settings" size={24} {...props} />
   };
 

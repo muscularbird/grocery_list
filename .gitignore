@@ -7,4 +7,7 @@ expo-env.d.ts
 node_modules/
 app-example/
 .env
+.env*.local
 .expo
+venv
+android/

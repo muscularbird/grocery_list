@@ -4,6 +4,26 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
 ## Get started
 
+### Supabase environment variables
+
+Create `.env.local` for local development:
+
+```bash
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_KEY=your-anon-key
+```
+
+For an EAS build, add the same variables to the EAS environment used by the
+build profile. The local `.env.local` file is ignored by Git and is not sent to
+EAS automatically:
+
+```bash
+eas env:create --name EXPO_PUBLIC_SUPABASE_URL --value https://your-project.supabase.co --environment preview
+eas env:create --name EXPO_PUBLIC_SUPABASE_KEY --value your-anon-key --environment preview
+```
+
+Use `--environment production` when building with the `production` profile.
+
 1. Install dependencies
 
    ```bash

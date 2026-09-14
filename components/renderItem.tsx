@@ -23,6 +23,11 @@ const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item
         setItemId(id);
     }
 
+    const setPurchased = (id: number, purchased: boolean) => {
+        console.log('Set purchased', id, purchased);
+        setItems((items: Item[]) => items.map((item) => item.id === id ? { ...item, purchased } : item));
+    }
+
     const renderLeftActions = () => (
       <View className='justify-center items-center m-4'>
         <Pressable onPress={() => editItem(item.id)}>
@@ -43,10 +48,12 @@ const renderItem = ({ item, drag, isActive, setItems, itemId, setItemId }: {item
       <Swipeable renderLeftActions={renderLeftActions} renderRightActions={renderRightActions}>
         <TouchableOpacity
           onLongPress={drag}
-          className="w-full h-24 justify-center p-4 rounded-2xl border-secondary border bg-primaryForeground"
+          onPress={() => setPurchased(item.id, !item.purchased)}
+          className={`w-full h-20 justify-between p-4 rounded-2xl border-secondary border my-1 flex-row items-center ${item.purchased ? 'bg-green-500' : 'bg-primaryForeground'}`}
           // style={{ backgroundColor: isActive ? 'gray' : 'white' }}
         >
-          <Text className="text-2xl text-text" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>{item.name} x{item.quantity}</Text>
+          <Text className="text-2xl text-text" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>{item.name}</Text>
+          <Text className="text-2xl text-text" style={{ fontFamily: 'Nunito', fontStyle: 'normal', fontWeight: '800' }}>x{item.quantity}</Text>
         </TouchableOpacity>
       </Swipeable>
     );

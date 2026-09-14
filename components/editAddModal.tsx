@@ -34,9 +34,16 @@ export default function EditAddModal({ modalVisible, setModalVisible, itemId, se
         }
         
         try {
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            showToast('error', 'Error', 'You must be signed in to add an item');
+            return;
+        }
+
         const { data, error } = await supabase
             .from('items')
-            .insert([{ name: itemName, quantity, purchased: false }])
+            .insert([{ name: itemName, quantity, purchased: false, user_id: user.id }])
             .select();
             
         if (error) {

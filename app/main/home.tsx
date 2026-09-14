@@ -1,6 +1,7 @@
-import { View, Modal, TextInput } from "react-native";
+import { View } from "react-native";
 import { supabase } from '@/utils/supabase';
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from 'expo-router';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import RenderItem from '@/components/renderItem';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -18,12 +19,23 @@ export default function Home() {
   const [items, setItems] = useState<Item[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [itemId, setItemId] = useState(-1);
-  const [data, setData] = useState(items);
 
-  useEffect(() => {
-    const getItems = async () => {
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const getItems = async () => {
       try {
-        const { data: items, error } = await supabase.from('items').select();
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          return
+        }
+
+        const { data: items, error } = await supabase
+          .from('items')
+          .select()
+          .eq('user_id', user.id)
         items?.sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0)); // sort by rank
 
         if (error) {
@@ -31,7 +43,7 @@ export default function Home() {
           return;
         }
 
-        if (items && items.length > 0) {
+        if (items && isActive) {
           console.log('Fetched items:', items);
           setItems(items);
         }
@@ -39,13 +51,17 @@ export default function Home() {
         console.error('Error fetching todos:', error.message);
         showToast('error', 'Error', error.message);
       }
-    };
+      };
 
-    getItems();
-  }, []);
+      getItems();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   const handleDragEnd = async ({ data }: { data: Item[] }) => {
-    setData(data);
     setItems(data);
 
     // Update rank in DB
