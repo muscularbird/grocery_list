@@ -1,4 +1,8 @@
 import { Stack, useRouter } from "expo-router";
+import { useFonts } from "expo-font";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Feather from "@expo/vector-icons/Feather";
 import { AuthProvider, useAuth } from "@/utils/AuthProvider";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -23,7 +27,7 @@ function RootNavigation() {
         else {
             router.replace('/(auth)/authScreen')
         }
-    }, [session, loading])
+    }, [session, loading, router])
     if (loading) {
         return (
             <View className="flex-1 justify-center items-center">
@@ -34,6 +38,16 @@ function RootNavigation() {
     return <Stack screenOptions={{ headerShown: false }} />
 }
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    ...MaterialIcons.font,
+    ...Ionicons.font,
+    ...Feather.font,
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
     return (
       <AuthProvider>
         <ThemeProvider>
