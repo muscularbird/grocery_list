@@ -1,6 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useEffect, useState } from 'react'
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import { supabase } from '@/utils/supabase'
 import showToast from '@/utils/showToast'
 
@@ -37,6 +38,11 @@ export default function Menus() {
 	const [isPublic, setIsPublic] = useState(false)
 	const [loadingDishes, setLoadingDishes] = useState(true)
 	const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+	const [weeklyMeals, setWeeklyMeals] = useState('')
+	const [weeklyMealsLoaded, setWeeklyMealsLoaded] = useState(false)
+	const [dishModalVisible, setDishModalVisible] = useState(false)
+	const [groceryDish, setGroceryDish] = useState<Dish | null>(null)
+	const [selectedIngredientIndexes, setSelectedIngredientIndexes] = useState<number[]>([])
 
 	useEffect(() => {
 		const loadDishes = async () => {
@@ -47,6 +53,9 @@ export default function Menus() {
 				return
 			}
 			setCurrentUserId(user.id)
+			const savedWeeklyMeals = await AsyncStorage.getItem(`weekly-meals:${user.id}`)
+			setWeeklyMeals(savedWeeklyMeals ?? '')
+			setWeeklyMealsLoaded(true)
 
 			const { data, error } = await supabase
 				.from('recipes')
@@ -73,6 +82,12 @@ export default function Menus() {
 
 		loadDishes()
 	}, [])
+
+	useEffect(() => {
+		if (!currentUserId || !weeklyMealsLoaded) return
+
+		AsyncStorage.setItem(`weekly-meals:${currentUserId}`, weeklyMeals)
+	}, [currentUserId, weeklyMeals, weeklyMealsLoaded])
 
 	const addIngredient = () => {
 		const nextIngredient = ingredientName.trim()
@@ -188,6 +203,7 @@ export default function Menus() {
 		setIngredientQuantity('1')
 		setEditingDishId(null)
 		setIsPublic(false)
+		setDishModalVisible(false)
 		showToast('success', editingDishId ? 'Dish updated' : 'Dish saved', `${name} is ready in your dishes.`)
 		} catch (error) {
             console.error('Error saving recipe:', error instanceof Error ? error.message : error)
@@ -202,6 +218,16 @@ export default function Menus() {
 		setDishName(dish.name)
 		setIngredients([...dish.ingredients])
 		setIsPublic(dish.is_public)
+		setDishModalVisible(true)
+	}
+
+	const openCreateDish = () => {
+		setEditingDishId(null)
+		setDishName('')
+		setIngredients([])
+		setIngredientQuantity('1')
+		setIsPublic(false)
+		setDishModalVisible(true)
 	}
 
 	const cancelEditing = () => {
@@ -210,6 +236,7 @@ export default function Menus() {
 		setIngredients([])
 		setIngredientQuantity('1')
 		setIsPublic(false)
+		setDishModalVisible(false)
 	}
 
 	const deleteDish = (dish: Dish) => {
@@ -235,7 +262,13 @@ export default function Menus() {
 		)
 	}
 
-	const addDishToGroceryList = async (dish: Dish) => {
+	const openGrocerySelection = (dish: Dish) => {
+		setGroceryDish(dish)
+		setSelectedIngredientIndexes(dish.ingredients.map((_, index) => index))
+	}
+
+	const addDishToGroceryList = async (dish: Dish, ingredientIndexes: number[]) => {
+		setGroceryDish(null)
 		setSaving(true)
 		try {
 			const { data: { user } } = await supabase.auth.getUser()
@@ -255,7 +288,7 @@ export default function Menus() {
 			}
 
 			const quantities = new Map<string, { name: string; quantity: number }>()
-			for (const ingredient of dish.ingredients) {
+			for (const ingredient of dish.ingredients.filter((_, index) => ingredientIndexes.includes(index))) {
 				const trimmedName = ingredient.name.trim()
 				const normalizedName = trimmedName.toLocaleLowerCase()
 				if (!normalizedName) continue
@@ -327,7 +360,29 @@ export default function Menus() {
 			>
 				<Text className="text-3xl font-bold text-foreground">Plats</Text>
 
-				<View className="rounded-2xl border border-border bg-card p-4 mt-4">
+				<View className="mt-4 rounded-2xl border border-border bg-card p-4">
+					<Text className="mb-1 text-lg font-bold text-cardForeground">Planifier la semaine</Text>
+					<Text className="mb-3 text-sm text-foregroundMuted">Notez les repas prévus pour cette semaine.</Text>
+					<TextInput
+						className="min-h-32 rounded-xl border border-border bg-input px-4 py-3 text-foreground"
+						placeholder={'Ex.\nLundi : Pâtes\nMardi : Soupe'}
+						placeholderTextColor="#94A3B8"
+						value={weeklyMeals}
+						onChangeText={setWeeklyMeals}
+						multiline
+						textAlignVertical="top"
+						accessibilityLabel="Repas prévus pour la semaine"
+					/>
+				</View>
+
+				<Modal
+					animationType="slide"
+					transparent
+					visible={dishModalVisible}
+					onRequestClose={cancelEditing}
+				>
+					<Pressable className="flex-1 justify-end bg-black/50" onPress={cancelEditing}>
+						<Pressable className="max-h-[90%] rounded-t-3xl bg-card p-5" onPress={(event) => event.stopPropagation()}>
 					<View className="mb-3 flex-row items-center justify-between">
 						<Text className="text-lg font-bold text-cardForeground">{editingDishId ? 'Editer le plat' : 'Créer un plat'}</Text>
 						{editingDishId ? (
@@ -408,10 +463,63 @@ export default function Menus() {
 					<Pressable
 						className="items-center rounded-xl bg-primary px-4 py-3 active:opacity-80"
 						onPress={createDish}
+						disabled={saving}
 					>
-						<Text className="font-bold text-primaryForeground">{editingDishId ? 'Editer le plat' : 'Sauvegarder le plat'}</Text>
+						<Text className="font-bold text-primaryForeground">{saving ? 'Sauvegarde...' : editingDishId ? 'Editer le plat' : 'Sauvegarder le plat'}</Text>
 					</Pressable>
-				</View>
+						</Pressable>
+					</Pressable>
+				</Modal>
+
+				<Modal
+					animationType="fade"
+					transparent
+					visible={groceryDish !== null}
+					onRequestClose={() => setGroceryDish(null)}
+				>
+					<Pressable className="flex-1 items-center justify-center bg-black/50 px-5" onPress={() => setGroceryDish(null)}>
+						<Pressable className="w-full rounded-3xl bg-card p-5" onPress={(event) => event.stopPropagation()}>
+							<Text className="text-xl font-bold text-cardForeground">Ajouter les ingrédients</Text>
+							<Text className="mb-4 mt-1 text-sm text-foregroundMuted">Décochez ce que vous avez déjà chez vous.</Text>
+							{groceryDish?.ingredients.map((ingredient, index) => {
+								const isSelected = selectedIngredientIndexes.includes(index)
+								return (
+									<Pressable
+										key={`${ingredient.name}-${index}`}
+										className="mb-2 flex-row items-center rounded-xl bg-backgroundSecondary px-3 py-3 active:opacity-70"
+										onPress={() => setSelectedIngredientIndexes((current) => isSelected
+											? current.filter((selectedIndex) => selectedIndex !== index)
+											: [...current, index])}
+										accessibilityRole="checkbox"
+										accessibilityState={{ checked: isSelected }}
+									>
+										<MaterialIcons
+											name={isSelected ? 'check-box' : 'check-box-outline-blank'}
+											size={24}
+											color={isSelected ? '#60A5FA' : '#94A3B8'}
+										/>
+										<Text className="ml-3 flex-1 text-foreground">{ingredient.name} x{ingredient.quantity}</Text>
+									</Pressable>
+								)
+							})}
+							<View className="mt-3 flex-row gap-3">
+								<Pressable
+									className="flex-1 items-center rounded-xl border border-border px-4 py-3 active:opacity-70"
+									onPress={() => setGroceryDish(null)}
+								>
+									<Text className="font-bold text-foreground">Annuler</Text>
+								</Pressable>
+								<Pressable
+									className="flex-1 items-center rounded-xl bg-primary px-4 py-3 active:opacity-80"
+									onPress={() => groceryDish && addDishToGroceryList(groceryDish, selectedIngredientIndexes)}
+									disabled={saving || selectedIngredientIndexes.length === 0}
+								>
+									<Text className="font-bold text-primaryForeground">Ajouter</Text>
+								</Pressable>
+							</View>
+						</Pressable>
+					</Pressable>
+				</Modal>
 
 				<Text className="mb-3 mt-8 text-lg font-bold text-foreground">Vos plats</Text>
 				{loadingDishes ? (
@@ -443,7 +551,7 @@ export default function Menus() {
 								{dish.is_public ? <Text className="mb-3 text-xs font-semibold text-success">Plat public</Text> : null}
 								<Pressable
 									className="flex-row items-center justify-center rounded-xl border border-primary px-4 py-2 active:opacity-70"
-									onPress={() => addDishToGroceryList(dish)}
+									onPress={() => openGrocerySelection(dish)}
 									disabled={saving}
 								>
 									<MaterialIcons name="playlist-add" size={20} color="#60A5FA" />
@@ -454,6 +562,13 @@ export default function Menus() {
 					</View>
 				)}
 			</ScrollView>
+			<Pressable
+				className="absolute bottom-28 right-5 h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg"
+				onPress={openCreateDish}
+				accessibilityLabel="Créer un plat"
+			>
+				<MaterialIcons name="add" size={32} color="#FFFFFF" />
+			</Pressable>
 		</KeyboardAvoidingView>
 	)
 }
